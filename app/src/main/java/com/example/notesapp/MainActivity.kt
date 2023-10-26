@@ -3,6 +3,7 @@ package com.example.notesapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 
 import androidx.compose.material3.Button
@@ -25,55 +26,105 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.*
+
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+//import androidx.navigation.compose.navigate
+import androidx.navigation.compose.composable
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyScreen()
+            App()
         }
     }
 }
 
-data class Note(val name: String)
+data class Note(val name: String, val text: String)
+
+//I learned how to switch screens from here: https://developer.android.com/codelabs/basic-android-kotlin-compose-navigation#3
+@Composable
+fun EditNoteScreen(navController: NavController){
+    Text("Edit note screen")
+}
+
+@Composable
+fun NextScreen() {
+    Text("This is the next screen")
+}
+
+@Composable
+fun App() {
+    val navController = rememberNavController()
+
+    // Set up the navigation graph
+    NavHost(navController = navController, startDestination = "StartScreen") {
+        composable("StartScreen") {
+            StartScreen(navController = navController)
+        }
+        composable("EditNoteScreen"){
+            EditNoteScreen(navController = navController)
+        }
+        composable("NextScreen") {
+            NextScreen()
+        }
+    }
+}
 
 //When I made the following function i got help from https://developer.android.com/jetpack/compose/tutorial
 //and ChatGPT: https://chat.openai.com/c/5b4da3b5-0596-4c01-a965-9f1ec9eb1842
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyScreen() {
+fun StartScreen(navController: NavController) {
     val notesState = remember { mutableStateListOf<Note>() }
-    val newNote = remember { mutableStateOf("") }
+    val newNoteName = remember { mutableStateOf("") }
+    val newNoteText = remember { mutableStateOf("") }
 
     Column {
         AddNoteButton() {
-            val noteName = newNote.value
+            val noteName = newNoteName.value
+            val noteText = newNoteText.value
             if (noteName.isNotEmpty()) {
-                notesState.add(Note(noteName))
-                newNote.value = ""
+                notesState.add(Note(noteName, noteText))
+                newNoteName.value = ""
+                newNoteText.value = ""
             }
         }
 
-        //I learned about this text field from: https://www.composables.com/components/material3/outlinedtextfield
-        OutlinedTextField(
-            value = newNote.value,
-            onValueChange = { newNote.value = it },
-            label = { Text("New Note Name") }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Column {
+                //I learned about this text field from: https://www.composables.com/components/material3/outlinedtextfield
+                OutlinedTextField(
+                    value = newNoteName.value,
+                    onValueChange = { newNoteName.value = it },
+                    label = { Text("New Note Name") }
 
-        )
+                )
+                OutlinedTextField(
+                    value = newNoteText.value,
+                    onValueChange = { newNoteText.value = it },
+                    label = { Text("New Note Text")}
+                )
+            }
 
-        NoteList(notes = notesState)
-
-
+        }
+        NoteList(notes = notesState, navController)
 
     }
 }
 
 //I had ChatGPT explain how to handle button clicks: https://chat.openai.com/c/5b4da3b5-0596-4c01-a965-9f1ec9eb1842
 @Composable
-fun AddNoteButton(onAddNoteClick: () -> Unit) {
+fun AddNoteButton(onAddNoteButtonClick: () -> Unit) {
     Button(
-        onClick = { onAddNoteClick() },
+        onClick = { onAddNoteButtonClick() },
         modifier = Modifier
             .height(100.dp)
             .fillMaxWidth()
@@ -91,31 +142,33 @@ fun AddNoteButton(onAddNoteClick: () -> Unit) {
 }
 
 @Composable
-fun AddNote(text: String){
+fun AddNote(name: String, text: String, navController: NavController){
     Button(
-        onClick = {  },
+        onClick = { navController.navigate("EditNoteScreen") },
         modifier = Modifier
             .height(100.dp)
             .fillMaxWidth()
             .padding(8.dp)
     ) {
         Text(
-            text = text,
+            text = name,
             style = TextStyle(
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             ),
             textAlign = TextAlign.Center
-        )}
+        )
+
+    }
 }
 
 
 @Composable
-fun NoteList(notes: List<Note>) {
+fun NoteList(notes: List<Note>, navController: NavController) {
     Column {
         notes.forEach{ note: Note ->
-            AddNote(note.name)
+            AddNote(note.name, note.text, navController)
         }
     }
 
