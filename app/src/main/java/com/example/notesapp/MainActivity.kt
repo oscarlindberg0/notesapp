@@ -3,8 +3,6 @@ package com.example.notesapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 
 import androidx.compose.material3.Button
@@ -13,18 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.dp
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,20 +39,41 @@ data class Note(val name: String)
 
 //When I made the following function i got help from https://developer.android.com/jetpack/compose/tutorial
 //and ChatGPT: https://chat.openai.com/c/5b4da3b5-0596-4c01-a965-9f1ec9eb1842
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyScreen() {
-    val notes = remember { mutableListOf(Note("Note 1"), Note("Note 2"), Note("Note 3")) } // Create a list of notes
+    val notesState = remember { mutableStateListOf<Note>() }
+    val newNote = remember { mutableStateOf("") }
 
     Column {
-        AddNoteButton()
-        NoteList(notes = notes)
+        AddNoteButton() {
+            val noteName = newNote.value
+            if (noteName.isNotEmpty()) {
+                notesState.add(Note(noteName))
+                newNote.value = ""
+            }
+        }
+
+        //I learned about this text field from: https://www.composables.com/components/material3/outlinedtextfield
+        OutlinedTextField(
+            value = newNote.value,
+            onValueChange = { newNote.value = it },
+            label = { Text("New Note Name") }
+
+        )
+
+        NoteList(notes = notesState)
+
+
+
     }
 }
 
+//I had ChatGPT explain how to handle button clicks: https://chat.openai.com/c/5b4da3b5-0596-4c01-a965-9f1ec9eb1842
 @Composable
-fun AddNoteButton() {
+fun AddNoteButton(onAddNoteClick: () -> Unit) {
     Button(
-        onClick = {  },
+        onClick = { onAddNoteClick() },
         modifier = Modifier
             .height(100.dp)
             .fillMaxWidth()
