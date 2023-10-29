@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.mutableStateListOf
@@ -27,12 +28,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.*
+import androidx.compose.ui.tooling.preview.Preview
 
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 //import androidx.navigation.compose.navigate
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,16 +51,6 @@ data class Note(val name: String, val text: String)
 
 //I learned how to switch screens from here: https://developer.android.com/codelabs/basic-android-kotlin-compose-navigation#3
 @Composable
-fun EditNoteScreen(navController: NavController){
-    Text("Edit note screen")
-}
-
-@Composable
-fun NextScreen() {
-    Text("This is the next screen")
-}
-
-@Composable
 fun App() {
     val navController = rememberNavController()
 
@@ -65,11 +59,16 @@ fun App() {
         composable("StartScreen") {
             StartScreen(navController = navController)
         }
-        composable("EditNoteScreen"){
-            EditNoteScreen(navController = navController)
-        }
-        composable("NextScreen") {
-            NextScreen()
+        composable(
+            route = "EditNoteScreen?name={name}&text={text}",
+            arguments = listOf(
+                navArgument("name") { type = NavType.StringType },
+                navArgument("text") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("name") ?: ""
+            val text = backStackEntry.arguments?.getString("text") ?: ""
+            EditNoteScreen(navController = navController, name = name, text = text)
         }
     }
 }
@@ -120,6 +119,43 @@ fun StartScreen(navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditNoteScreen(navController: NavController, name: String, text: String){
+
+    var noteName = remember { mutableStateOf(name) }
+    var noteText = remember { mutableStateOf(text) }
+    Column {
+
+        OutlinedTextField(
+            value = noteName.value,
+            onValueChange = { noteName.value = it },
+            label = { Text("Edit Note Name") }
+
+        )
+        OutlinedTextField(
+            value = noteText.value,
+            onValueChange = { noteText.value = it },
+            label = { Text("Edit Note Text")}
+        )
+        Button(
+            onClick = {
+                val updatedName = noteName.value
+                val updatedText = noteText.value
+
+                navController.navigate("StartScreen?name=$updatedName&text=$updatedText")
+                      },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(8.dp)
+        ) {
+            Text(text = "Save")
+
+        }
+    }
+}
+
 //I had ChatGPT explain how to handle button clicks: https://chat.openai.com/c/5b4da3b5-0596-4c01-a965-9f1ec9eb1842
 @Composable
 fun AddNoteButton(onAddNoteButtonClick: () -> Unit) {
@@ -144,7 +180,7 @@ fun AddNoteButton(onAddNoteButtonClick: () -> Unit) {
 @Composable
 fun AddNote(name: String, text: String, navController: NavController){
     Button(
-        onClick = { navController.navigate("EditNoteScreen") },
+        onClick = { navController.navigate("EditNoteScreen?name=$name&text=$text") },
         modifier = Modifier
             .height(100.dp)
             .fillMaxWidth()
@@ -173,6 +209,7 @@ fun NoteList(notes: List<Note>, navController: NavController) {
     }
 
 }
+
 
 
 
