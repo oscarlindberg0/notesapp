@@ -24,6 +24,16 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
     Column {
 
         Button(
+            onClick = { navController.navigate("NoteDetailsScreen?name=$name&text=$text") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(8.dp)
+        ) {
+            Text(text = "Note Details")
+
+        }
+        Button(
             onClick = {
                 val index = NoteManager.getNoteIndex(name)
                 NoteManager.globalNoteList.removeAt(index)

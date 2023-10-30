@@ -29,5 +29,15 @@ fun App() {
             val text = backStackEntry.arguments?.getString("text") ?: ""
             EditNoteScreen(navController = navController, name = name, text = text)
         }
+        composable(route = "NoteDetailsScreen?name={name}&text={text}",
+            arguments = listOf(
+                navArgument("name") { type = NavType.StringType },
+                navArgument("text") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("name") ?: ""
+            val text = backStackEntry.arguments?.getString("text") ?: ""
+            NoteDetailsScreen(navController = navController, name = name, text = text)
+        }
     }
 }
