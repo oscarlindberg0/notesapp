@@ -13,10 +13,8 @@ fun App() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "StartScreen") {
         composable("StartScreen"
-        ) { backStackEntry ->
-            val name = backStackEntry.arguments?.getString("name") ?: ""
-            val text = backStackEntry.arguments?.getString("text") ?: ""
-            StartScreen(navController = navController, name = name, text = text)
+        ) {
+            StartScreen(navController = navController)
         }
         composable(
             route = "EditNoteScreen?name={name}&text={text}",

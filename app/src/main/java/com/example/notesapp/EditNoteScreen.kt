@@ -19,8 +19,8 @@ import androidx.navigation.NavController
 @Composable
 fun EditNoteScreen(navController: NavController, name: String, text: String){
 
-    var noteName = remember { mutableStateOf(name) }
-    var noteText = remember { mutableStateOf(text) }
+    val noteName = remember { mutableStateOf(name) }
+    val noteText = remember { mutableStateOf(text) }
     Column {
 
         Button(

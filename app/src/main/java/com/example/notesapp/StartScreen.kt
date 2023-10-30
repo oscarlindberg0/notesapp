@@ -18,7 +18,7 @@ import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartScreen(navController: NavController, name: String, text: String) {
+fun StartScreen(navController: NavController) {
     val notesState = NoteManager.globalNoteList
     val newNoteName = remember { mutableStateOf("") }
     val newNoteText = remember { mutableStateOf("") }
@@ -29,7 +29,7 @@ fun StartScreen(navController: NavController, name: String, text: String) {
             .verticalScroll(rememberScrollState())
     ){
         //I had ChatGPT explain how to handle button clicks: https://chat.openai.com/c/5b4da3b5-0596-4c01-a965-9f1ec9eb1842
-        AddNoteButton() {
+        AddNoteButton {
             val noteName = newNoteName.value
             val noteText = newNoteText.value
             val isValid = NoteManager.validate(noteName, noteText)
