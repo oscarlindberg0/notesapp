@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.dp
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.mutableStateListOf
@@ -28,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.material.*
-import androidx.compose.ui.tooling.preview.Preview
 
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -54,7 +54,7 @@ data class Note(val name: String, val text: String)
 object NoteManager{
     val globalNoteList = mutableStateListOf<Note>()
 
-    fun GetNoteIndex(name: String): Int {
+    fun getNoteIndex(name: String): Int {
         return globalNoteList.indexOfFirst { it.name == name }
     }
 
@@ -63,6 +63,10 @@ object NoteManager{
             name.length > 50 ||
             text.length > 120)
             return false
+        globalNoteList.forEach { note: Note ->
+            if(note.name == name)
+                return false
+        }
         return true
     }
 }
@@ -101,7 +105,11 @@ fun StartScreen(navController: NavController, name: String, text: String) {
     val newNoteName = remember { mutableStateOf("") }
     val newNoteText = remember { mutableStateOf("") }
 
-    Column {
+    Column (
+        modifier = Modifier
+            //I got the scrollable column from here: https://androidwave.com/create-a-scrollable-column-in-jetpack-compose/
+            .verticalScroll(rememberScrollState())
+    ){
         AddNoteButton() {
             val noteName = newNoteName.value
             val noteText = newNoteText.value
@@ -149,7 +157,7 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
 
         Button(
             onClick = {
-                val index = NoteManager.GetNoteIndex(name)
+                val index = NoteManager.getNoteIndex(name)
                 NoteManager.globalNoteList.removeAt(index)
                 navController.navigate("StartScreen")
             },
@@ -180,7 +188,7 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
                 val isValid = NoteManager.validate(updatedName, updatedText)
 
                 if((updatedName != name || updatedText != text) && isValid) {
-                    val index = NoteManager.GetNoteIndex(name)
+                    val index = NoteManager.getNoteIndex(name)
                     NoteManager.globalNoteList.removeAt(index)
                     NoteManager.globalNoteList.add(Note(updatedName, updatedText))
                 }
