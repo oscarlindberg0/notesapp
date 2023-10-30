@@ -57,6 +57,14 @@ object NoteManager{
     fun GetNoteIndex(name: String): Int {
         return globalNoteList.indexOfFirst { it.name == name }
     }
+
+    fun validate(name: String, text: String): Boolean {
+        if(name.length < 3 ||
+            name.length > 50 ||
+            text.length > 120)
+            return false
+        return true
+    }
 }
 
 //I learned how to switch screens from here: https://developer.android.com/codelabs/basic-android-kotlin-compose-navigation#3
@@ -97,7 +105,8 @@ fun StartScreen(navController: NavController, name: String, text: String) {
         AddNoteButton() {
             val noteName = newNoteName.value
             val noteText = newNoteText.value
-            if (noteName.isNotEmpty()) {
+            val isValid = NoteManager.validate(noteName, noteText)
+            if (noteName.isNotEmpty() && isValid) {
                 notesState.add(Note(noteName, noteText))
                 newNoteName.value = ""
                 newNoteText.value = ""
@@ -168,14 +177,15 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
             onClick = {
                 val updatedName = noteName.value
                 val updatedText = noteText.value
+                val isValid = NoteManager.validate(updatedName, updatedText)
 
-                if(updatedName != name || updatedText != text) {
+                if((updatedName != name || updatedText != text) && isValid) {
                     val index = NoteManager.GetNoteIndex(name)
                     NoteManager.globalNoteList.removeAt(index)
                     NoteManager.globalNoteList.add(Note(updatedName, updatedText))
                 }
                 navController.navigate("StartScreen?name=$updatedName&text=$updatedText")
-                      },
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
