@@ -49,15 +49,26 @@ class MainActivity : ComponentActivity() {
 
 data class Note(val name: String, val text: String)
 
+//ChatGPT helped me come up with the following solution to be able to save data when navigating
+//between screens: https://chat.openai.com/c/6d9b5ceb-b81a-45b2-a69d-a938b95a1b94
+object NoteManager{
+    val globalNoteList = mutableStateListOf<Note>()
+
+    fun GetNoteIndex(name: String): Int {
+        return globalNoteList.indexOfFirst { it.name == name }
+    }
+}
+
 //I learned how to switch screens from here: https://developer.android.com/codelabs/basic-android-kotlin-compose-navigation#3
 @Composable
 fun App() {
     val navController = rememberNavController()
-
-    // Set up the navigation graph
     NavHost(navController = navController, startDestination = "StartScreen") {
-        composable("StartScreen") {
-            StartScreen(navController = navController)
+        composable("StartScreen"
+        ) { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("name") ?: ""
+            val text = backStackEntry.arguments?.getString("text") ?: ""
+            StartScreen(navController = navController, name = name, text = text)
         }
         composable(
             route = "EditNoteScreen?name={name}&text={text}",
@@ -77,8 +88,8 @@ fun App() {
 //and ChatGPT: https://chat.openai.com/c/5b4da3b5-0596-4c01-a965-9f1ec9eb1842
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartScreen(navController: NavController) {
-    val notesState = remember { mutableStateListOf<Note>() }
+fun StartScreen(navController: NavController, name: String, text: String) {
+    val notesState = NoteManager.globalNoteList
     val newNoteName = remember { mutableStateOf("") }
     val newNoteText = remember { mutableStateOf("") }
 
@@ -127,6 +138,21 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
     var noteText = remember { mutableStateOf(text) }
     Column {
 
+        Button(
+            onClick = {
+                val index = NoteManager.GetNoteIndex(name)
+                NoteManager.globalNoteList.removeAt(index)
+                navController.navigate("StartScreen")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(8.dp)
+        ) {
+            Text(text = "Delete Note")
+
+        }
+
         OutlinedTextField(
             value = noteName.value,
             onValueChange = { noteName.value = it },
@@ -143,6 +169,11 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
                 val updatedName = noteName.value
                 val updatedText = noteText.value
 
+                if(updatedName != name || updatedText != text) {
+                    val index = NoteManager.GetNoteIndex(name)
+                    NoteManager.globalNoteList.removeAt(index)
+                    NoteManager.globalNoteList.add(Note(updatedName, updatedText))
+                }
                 navController.navigate("StartScreen?name=$updatedName&text=$updatedText")
                       },
             modifier = Modifier
@@ -151,6 +182,18 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
                 .padding(8.dp)
         ) {
             Text(text = "Save")
+
+        }
+        Button(
+            onClick = {
+                navController.navigate("StartScreen")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(8.dp)
+        ) {
+            Text(text = "Cancel")
 
         }
     }
@@ -207,8 +250,8 @@ fun NoteList(notes: List<Note>, navController: NavController) {
             AddNote(note.name, note.text, navController)
         }
     }
-
 }
+
 
 
 
