@@ -56,7 +56,8 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
             label = { Text("Edit Note Name") },
             //I got the following solution from: https://stackoverflow.com/questions/68573228/how-to-show-error-message-in-outlinedtextfield-in-jetpack-compose
             supportingText = {
-                if (!NoteManager.validate(noteName.value, "aaaa")) {
+                if (!NoteManager.validate(noteName.value, "aaaa") &&
+                    noteName.value != name) {
                     Text(
                         text = "Invalid input",
                         style = androidx.compose.ui.text.TextStyle(
@@ -87,7 +88,7 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
                 val updatedText = noteText.value
                 val isValid = NoteManager.validate(updatedName, updatedText)
 
-                if((updatedName != name || updatedText != text) && isValid) {
+                if(updatedName == name || isValid) {
                     val index = NoteManager.getNoteIndex(name)
                     NoteManager.globalNoteList.removeAt(index)
                     NoteManager.globalNoteList.add(Note(updatedName, updatedText))
