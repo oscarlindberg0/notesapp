@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
@@ -50,13 +51,29 @@ fun StartScreen(navController: NavController) {
                 OutlinedTextField(
                     value = newNoteName.value,
                     onValueChange = { newNoteName.value = it },
-                    label = { Text("New Note Name") }
+                    label = { Text("New Note Name") },
+                    supportingText = { if(!NoteManager.validate(newNoteName.value, "aaaa")){
+                        Text(text = "Invalid input",
+                            style = androidx.compose.ui.text.TextStyle(
+                                color = Color.Red
+                            )
+                        )
+                    }
+                    }
 
                 )
                 OutlinedTextField(
                     value = newNoteText.value,
                     onValueChange = { newNoteText.value = it },
-                    label = { Text("New Note Text") }
+                    label = { Text("New Note Text") },
+                    supportingText = { if(!NoteManager.validate("aaaa", newNoteText.value)){
+                        Text(text = "Invalid input",
+                            style = androidx.compose.ui.text.TextStyle(
+                                color = Color.Red
+                            )
+                        )
+                    }
+                    }
                 )
             }
 

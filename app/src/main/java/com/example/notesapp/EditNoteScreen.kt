@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,13 +53,33 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
         OutlinedTextField(
             value = noteName.value,
             onValueChange = { noteName.value = it },
-            label = { Text("Edit Note Name") }
+            label = { Text("Edit Note Name") },
+            //I got the following solution from: https://stackoverflow.com/questions/68573228/how-to-show-error-message-in-outlinedtextfield-in-jetpack-compose
+            supportingText = {
+                if (!NoteManager.validate(noteName.value, "aaaa")) {
+                    Text(
+                        text = "Invalid input",
+                        style = androidx.compose.ui.text.TextStyle(
+                            color = Color.Red
+                        )
+                    )
+                }
+            }
+
 
         )
         OutlinedTextField(
             value = noteText.value,
             onValueChange = { noteText.value = it },
-            label = { Text("Edit Note Text") }
+            label = { Text("Edit Note Text") },
+            supportingText = { if(!NoteManager.validate("aaaa", noteText.value)){
+                Text(text = "Invalid input",
+                    style = androidx.compose.ui.text.TextStyle(
+                        color = Color.Red
+                    )
+                )
+            }
+            }
         )
         Button(
             onClick = {
