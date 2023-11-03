@@ -93,7 +93,7 @@ fun EditNoteScreen(navController: NavController, name: String, text: String){
                     NoteManager.globalNoteList.removeAt(index)
                     NoteManager.globalNoteList.add(Note(updatedName, updatedText))
                 }
-                navController.navigate("StartScreen?name=$updatedName&text=$updatedText")
+                navController.navigate("StartScreen")
             },
             modifier = Modifier
                 .fillMaxWidth()
